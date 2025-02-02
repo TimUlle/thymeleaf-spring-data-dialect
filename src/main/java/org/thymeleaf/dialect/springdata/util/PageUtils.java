@@ -33,7 +33,6 @@ import org.thymeleaf.web.IWebRequest;
 import org.thymeleaf.web.servlet.IServletWebRequest;
 import org.unbescape.html.HtmlEscape;
 
-@SuppressWarnings("unchecked")
 public final class PageUtils {
 
     private PageUtils() {
@@ -84,6 +83,12 @@ public final class PageUtils {
     }
 
     public static String createPageUrl(final ITemplateContext context, int pageNumber) {
+
+	    	final String jsFunction = (String) context.getVariable(Keys.PAGINATION_JS_FUNCTION_KEY);
+	      if (jsFunction != null) {
+	      	return getJavaScriptURL(jsFunction, new StringBuilder().append(PAGE).append(EQ).append(pageNumber).toString());
+	      }
+
         final String prefix = getParamPrefix(context);
         final Collection<String> excludedParams = Arrays.asList(new String[] { prefix.concat(PAGE) });
         final String baseUrl = buildBaseUrl(context, excludedParams);
@@ -100,11 +105,6 @@ public final class PageUtils {
      * @return sort URL
      */
     public static String createSortUrl(final ITemplateContext context, final String fieldName, final Direction forcedDir) {
-        // Params can be prefixed to manage multiple pagination on the same page
-        final String prefix = getParamPrefix(context);
-        final Collection<String> excludedParams = Arrays
-                .asList(new String[] { prefix.concat(SORT), prefix.concat(PAGE) });
-        final String baseUrl = buildBaseUrl(context, excludedParams);
 
         final StringBuilder sortParam = new StringBuilder();
         final Page<?> page = findPage(context);
@@ -121,10 +121,27 @@ public final class PageUtils {
             sortParam.append(fieldName);
         }
 
+        final String jsFunction = (String) context.getVariable(Keys.PAGINATION_JS_FUNCTION_KEY);
+        if (jsFunction != null) {
+        	return getJavaScriptURL(jsFunction, new StringBuilder().append(SORT).append(EQ).append(sortParam).toString());
+        }
+
+        // Params can be prefixed to manage multiple pagination on the same page
+        final String prefix = getParamPrefix(context);
+        final Collection<String> excludedParams = Arrays
+                .asList(new String[] { prefix.concat(SORT), prefix.concat(PAGE) });
+        final String baseUrl = buildBaseUrl(context, excludedParams);
+
         return buildUrl(baseUrl, context).append(SORT).append(EQ).append(sortParam).toString();
     }
 
     public static String createPageSizeUrl(final ITemplateContext context, int pageSize) {
+
+	    	final String jsFunction = (String) context.getVariable(Keys.PAGINATION_JS_FUNCTION_KEY);
+	      if (jsFunction != null) {
+	      	return getJavaScriptURL(jsFunction, new StringBuilder().append(SIZE).append(EQ).append(pageSize).toString());
+	      }
+
         final String prefix = getParamPrefix(context);
         // Reset page number to avoid empty lists
         final Collection<String> excludedParams = Arrays
@@ -244,6 +261,25 @@ public final class PageUtils {
         final String prefix = (String) context.getVariable(Keys.PAGINATION_QUALIFIER_PREFIX);
 
         return prefix == null ? EMPTY : prefix.concat("_");
+    }
+
+    private static String getJavaScriptURL(String functionName, String params) {
+    		return Strings.concat(
+    				Strings.JAVASCRIPT_VOID_0,
+    				Strings.DOUBLE_QUOTE,
+    				Strings.BLANK,
+    				Strings.ONCLICK,
+    				Strings.EQ,
+    				Strings.DOUBLE_QUOTE,
+    				functionName,
+    				Strings.PARENTHESIS_OPEN,
+    				Strings.SINGLE_QUOTE,
+    				params,
+    				Strings.SINGLE_QUOTE,
+    				Strings.COMMA,
+    				Strings.THIS,
+    				Strings.PARENTHESIS_CLOSE
+    	  );
     }
 
 }

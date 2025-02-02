@@ -22,7 +22,7 @@ final class PaginationAttrProcessor extends AbstractAttributeTagProcessor {
     protected void doProcess(ITemplateContext context, IProcessableElementTag tag, AttributeName attributeName,
             String attributeValue, IElementTagStructureHandler structureHandler) {
 
-        String attrValue = String.valueOf(attributeValue).trim();
+				String attrValue = String.valueOf(attributeValue).trim();
         PaginationDecorator decorator = PaginationDecoratorRegistry.getInstance().getDecorator(attrValue);
         String html = decorator.decorate(tag, context);
 
